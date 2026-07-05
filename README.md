@@ -83,7 +83,7 @@ Remove-Item "C:\Scripts\PowerPlanSwitcher.ps1"
   ```powershell
   Get-ChildItem -Recurse | Unblock-File
   ```
-- Tested on an ASUS ROG Strix laptop with hybrid Optimus graphics.
+- Tested on my ASUS ROG Strix laptop with hybrid Optimus graphics. Should work on other devices too.
 
 ## License
 
