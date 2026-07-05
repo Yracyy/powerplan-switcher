@@ -77,13 +77,48 @@ Unregister-ScheduledTask -TaskName "PowerPlanSwitcher" -Confirm:$false
 Remove-Item "C:\Scripts\PowerPlanSwitcher.ps1"
 ```
 
+## Troubleshooting
+
+**The switcher doesn't seem to run when I log in on battery**
+
+By default, tasks created with `Register-ScheduledTask` include a condition that says *"Start the task only if the computer is on AC power."* Since the entire point of this script is to react to battery power, that default setting will silently prevent it from ever starting if you log in unplugged.
+
+To fix this:
+1. Open **Task Scheduler** (`taskschd.msc`)
+2. Find **PowerPlanSwitcher** in the Task Scheduler Library
+3. Right-click → **Properties**
+4. Go to the **Conditions** tab
+5. Under **Power**, untick **"Start the task only if the computer is on AC power"**
+6. Click **OK**
+
+This is a one-time fix — worth doing right after install, since otherwise the switcher only ever works if you happen to log in while plugged in.
+
+**The task also stops when I unplug mid-session**
+
+Same Conditions tab — there's a related setting: *"Stop if the computer switches to battery power."* Make sure that one is unticked too, or the watcher will kill itself the moment you unplug, which defeats the purpose.
+
+**Nothing happens at all, even on AC**
+
+Check the log at `C:\Logs\PowerPlanSwitcher\switcher.log` for an `ERROR` line — usually this means `Get-CimInstance` couldn't find `Win32_Battery` (rare, but can happen on some OEM battery drivers). Confirm your device shows a battery by running `Get-CimInstance -ClassName Win32_Battery` manually first.
+
+**"Cannot be loaded because running scripts is disabled on this system"**
+
+Same fix as any PowerShell script:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+or unblock the specific file:
+```powershell
+Unblock-File -Path "C:\Scripts\PowerPlanSwitcher.ps1"
+```
+
 ## Notes
 
 - Execution policy: if you get a "running scripts is disabled" error, unblock the downloaded files first:
   ```powershell
   Get-ChildItem -Recurse | Unblock-File
   ```
-- Tested on my ASUS ROG Strix laptop with hybrid Optimus graphics. Should work on other devices too.
+- Tested on my ASUS ROG Strix laptop with hybrid Optimus graphics. Other device should work too.
 
 ## License
 
